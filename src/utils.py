@@ -48,7 +48,7 @@ def create_database(database_name, params):
         cur.execute('''
             CREATE TABLE companies(
             company_id SERIAL PRIMARY KEY,
-            company_name VARCHAR(150) NOT NULL UNIQUE ,
+            company_name VARCHAR(150) NOT NULL,
             url_company TEXT
             )
             ''')
@@ -78,22 +78,15 @@ def save_data_to_database(data, database_name, params):
     '''Сохранение полученной информации в таблицах'''
     conn = psycopg2.connect(dbname=database_name, **params)
     with conn.cursor() as cur:
-        cur.execute('''
-                    INSERT INTO companies(company_name, url_company)
-                    VALUES 
-                    ('КРОСТ', 'https://hh.ru/employer/2302207'),
-                    ('МСУ-1', 'https://hh.ru/employer/159880'),
-                    ('Компания Самолет', 'https://hh.ru/employer/159880'),
-                    ('ЛРА Строй', 'https://hh.ru/employer/1840223'),
-                    ('ГК Спутник', 'https://hh.ru/employer/1641656'),
-                    ('НОАТЕК', 'https://hh.ru/employer/1277564'),
-                    ('Альянс-Пресс', 'https://hh.ru/employer/1228593'),
-                    ('Стройтех Групп', 'https://hh.ru/employer/9231282')
-                    RETURNING company_id
-                    ''', )
-        company_id = cur.fetchone()[0]
         for company in data:
-
+            company_data = company['companies']
+            cur.execute('''
+            INSERT INTO companies(company_name, url_company)
+            VALUES (%s, %s)
+            RETURNING company_id
+            ''',
+            (company_data['company_name'], company_data['company_url']))
+            company_id = cur.fetchone()[0]
             vacansy_data = company['vacancies']
             cur.execute('''
             INSERT INTO vacancies(company_id, vacancy_name, city_name, publish_date, salary_from, salary_to,
