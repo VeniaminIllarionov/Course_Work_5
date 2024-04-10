@@ -54,6 +54,3 @@ class DBManager:
                                f"WHERE vacancy_name LIKE '%инженер%'")
         return result
 
-
-ddd = DBManager()
-print(ddd.get_vacancies_with_keyword())
