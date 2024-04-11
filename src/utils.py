@@ -66,39 +66,36 @@ def create_database(database_name, params):
     cur.execute(f'CREATE DATABASE {database_name}')
 
     conn.close()
-    conn = psycopg2.connect(dbname=database_name, **params)
-
-    with conn.cursor() as cur:
-        cur.execute('''
-            CREATE TABLE companies(
-            company_id SERIAL PRIMARY KEY ,
-            company_name VARCHAR(150) NOT NULL,
-            url_company TEXT
-            )
-            ''')
-
-    with conn.cursor() as cur:
-        cur.execute('''
-        CREATE TABLE vacancies(
-        vacancy_id SERIAL PRIMARY KEY,
-        company_id INT REFERENCES companies(company_id),
-        vacancy_name VARCHAR(150) NOT NULL,
-        city_name VARCHAR(100),
-        publish_date DATE,
-        company_name VARCHAR(150) NOT NULL ,
-        salary_from INTEGER,
-        salary_to INTEGER,
-        url_vacancy TEXT
-        )
-        ''')
-
-    conn.commit()
-    conn.close()
 
 
 def save_data_to_database(company_list, vacansy_list, database_name, params):
     '''Сохранение полученной информации в таблицах'''
     conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        cur.execute('''
+               CREATE TABLE companies(
+               company_id SERIAL PRIMARY KEY ,
+               company_name VARCHAR(150) NOT NULL,
+               url_company TEXT
+               )
+               ''')
+
+    with conn.cursor() as cur:
+        cur.execute('''
+           CREATE TABLE vacancies(
+           vacancy_id SERIAL PRIMARY KEY,
+           company_id INT REFERENCES companies(company_id),
+           vacancy_name VARCHAR(150) NOT NULL,
+           city_name VARCHAR(100),
+           publish_date DATE,
+           company_name VARCHAR(150) NOT NULL ,
+           salary_from INTEGER,
+           salary_to INTEGER,
+           url_vacancy TEXT
+           )
+           ''')
+
     with conn.cursor() as cur:
         for company in company_list:
             company_data = company['companies']
@@ -116,9 +113,9 @@ def save_data_to_database(company_list, vacansy_list, database_name, params):
                      salary_to, url_vacancy)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     ''',
-                            (vacansy_data['company_name'], company_id, vacansy_data['vacancy_name'], vacansy_data['city'],
-                             vacansy_data['publish_date'],
-                             vacansy_data['salary_from'], vacansy_data['salary_to'], vacansy_data['vacancy_url'])
+                            (vacansy_data['company_name'], company_id, vacansy_data['vacancy_name'],
+                             vacansy_data['city'], vacansy_data['publish_date'], vacansy_data['salary_from'],
+                             vacansy_data['salary_to'], vacansy_data['vacancy_url'])
                             )
 
     conn.commit()
