@@ -74,6 +74,7 @@ def create_database(database_name, params):
         cur.execute('''
         CREATE TABLE vacancies(
         vacancy_id SERIAL PRIMARY KEY,
+        company_id INT REFERENCES companies(company_id),
         vacancy_name VARCHAR(150) NOT NULL,
         city_name VARCHAR(100),
         publish_date DATE,
@@ -101,14 +102,15 @@ def save_data_to_database(company_list, vacansy_list, database_name, params):
                 RETURNING company_id
                 ''',
                         (company_data['company_name'], company_data['company_url']))
+            company_id = cur.fetchone()[0]
             for vacancy in vacansy_list:
                 vacansy_data = vacancy['vacancies']
                 cur.execute('''
-                    INSERT INTO vacancies(company_name, vacancy_name, city_name, publish_date, salary_from, salary_to,
-                    url_vacancy)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO vacancies(company_name, company_id, vacancy_name, city_name, publish_date, salary_from,
+                     salary_to, url_vacancy)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     ''',
-                            (vacansy_data['company_name'], vacansy_data['vacancy_name'], vacansy_data['city'],
+                            (vacansy_data['company_name'], company_id, vacansy_data['vacancy_name'], vacansy_data['city'],
                              vacansy_data['publish_date'],
                              vacansy_data['salary_from'], vacansy_data['salary_to'], vacansy_data['vacancy_url'])
                             )
