@@ -85,7 +85,6 @@ def create_database(database_name, params):
         )
         ''')
 
-
     conn.commit()
     conn.close()
 
